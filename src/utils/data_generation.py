@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from src.models.ddm import DriftDiffusionModel
+from src.models.kalman import KalmanFilter
 
 
 def generate_bayesian_dataset(
@@ -64,6 +65,19 @@ def generate_ddm_dataset(v=1.0, a=1.2, t0=0.25, n_trials=500, seed=None):
     return DriftDiffusionModel.simulate(v=v, a=a, t0=t0, n_trials=n_trials, seed=seed)
 
 
+def generate_kalman_dataset(process_noise=0.5, observation_noise=1.2,
+                             n_steps=100, seed=None):
+    """
+    Generate synthetic tracking data following a random walk with noisy observations.
+    """
+    return KalmanFilter.simulate(
+        process_noise=process_noise,
+        observation_noise=observation_noise,
+        n_steps=n_steps,
+        seed=seed,
+    )
+
+
 if __name__ == '__main__':
     bayes_df = generate_bayesian_dataset(seed=42)
     bayes_df.to_csv('data/examples/bayesian_example.csv', index=False)
@@ -72,3 +86,7 @@ if __name__ == '__main__':
     ddm_df = generate_ddm_dataset(seed=42)
     ddm_df.to_csv('data/examples/ddm_example.csv', index=False)
     print(f"Saved {len(ddm_df)} trials to data/examples/ddm_example.csv")
+
+    kalman_df = generate_kalman_dataset(seed=42)
+    kalman_df.to_csv('data/examples/kalman_example.csv', index=False)
+    print(f"Saved {len(kalman_df)} observations to data/examples/kalman_example.csv")

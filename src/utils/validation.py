@@ -12,6 +12,10 @@ Drift diffusion: validated against parameter recovery as reported in
 Ratcliff & McKoon (2008), "The Diffusion Decision Model". We generate
 data from known drift, boundary, and non-decision parameters and confirm
 that maximum likelihood estimation recovers them.
+
+Kalman filter: validated by parameter recovery on simulated random-walk
+tracking data, following the cognitive modelling logic in Shadmehr &
+Mussa-Ivaldi (2012).
 """
 
 import numpy as np
@@ -19,10 +23,16 @@ import pandas as pd
 
 from src.models.bayesian import BayesianIntegration
 from src.models.ddm import DriftDiffusionModel
-from src.utils.data_generation import generate_bayesian_dataset, generate_ddm_dataset
+from src.models.kalman import KalmanFilter
+from src.utils.data_generation import (
+    generate_bayesian_dataset,
+    generate_ddm_dataset,
+    generate_kalman_dataset,
+)
 
 
-def validate_bayesian(visual_noise_levels=(0.5, 1.5, 3.0, 6.0), auditory_noise=3.0, n_trials=400, seed=7):
+def validate_bayesian(visual_noise_levels=(0.5, 1.5, 3.0, 6.0),
+                       auditory_noise=3.0, n_trials=400, seed=7):
     results = []
     for sigma_v in visual_noise_levels:
         data = generate_bayesian_dataset(
@@ -83,12 +93,34 @@ def validate_ddm(parameter_sets=None, n_trials=800, seed=42):
     return pd.DataFrame(results)
 
 
+def validate_kalman(parameter_sets=None, n_steps=300, seed=11):
+    if parameter_sets is None:
+        parameter_sets = [
+            {'process_noise': 0.3, 'observation_noise': 0.8},
+            {'process_noise': 0.5, 'observation_noise': 1.2},
+            {'process_noise': 1.0, 'observation_noise': 2.0},
+            {'process_noise': 0.2, 'observation_noise': 1.5},
+        ]
+    results = []
+    for i, params in enumerate(parameter_sets):
+        data = generate_kalman_dataset(
+            process_noise=params['process_noise'],
+            observation_noise=params['observation_noise'],
+            n_steps=n_steps, seed=seed + i,
+        )
+        model = KalmanFilter().fit(data)
+        results.append({
+            'true_process_noise': params['process_noise'],
+            'fitted_process_noise': model.process_noise,
+            'true_observation_noise': params['observation_noise'],
+            'fitted_observation_noise': model.observation_noise,
+        })
+    return pd.DataFrame(results)
+
+
 def print_bayesian_report(results):
     print("Bayesian integration — Alais & Burr (2004) paradigm")
     print("=" * 70)
-    print()
-    print("Visual weight: optimal prediction vs. fitted from data")
-    print("-" * 70)
     for _, row in results.iterrows():
         diff = abs(row['optimal_weight_visual'] - row['fitted_weight_visual'])
         print(
@@ -97,26 +129,27 @@ def print_bayesian_report(results):
             f"fitted w_v = {row['fitted_weight_visual']:.3f}  |  "
             f"|diff| = {diff:.3f}"
         )
-    print()
-    print("Combined response variability: prediction vs. empirical")
-    print("-" * 70)
-    for _, row in results.iterrows():
-        print(
-            f"  sigma_v = {row['true_sigma_visual']:.2f}  |  "
-            f"predicted sigma = {row['optimal_sigma_combined']:.3f}  |  "
-            f"empirical sigma = {row['empirical_sigma_combined']:.3f}"
-        )
 
 
 def print_ddm_report(results):
     print()
-    print("Drift diffusion — parameter recovery (Ratcliff & McKoon, 2008)")
+    print("Drift diffusion — parameter recovery")
     print("=" * 70)
-    print()
     for _, row in results.iterrows():
         print(
             f"  true (v={row['true_v']:+.2f}, a={row['true_a']:.2f}, t0={row['true_t0']:.2f})"
             f"   -->   fitted (v={row['fitted_v']:+.2f}, a={row['fitted_a']:.2f}, t0={row['fitted_t0']:.2f})"
+        )
+
+
+def print_kalman_report(results):
+    print()
+    print("Kalman filter — parameter recovery")
+    print("=" * 70)
+    for _, row in results.iterrows():
+        print(
+            f"  true (q={row['true_process_noise']:.2f}, r={row['true_observation_noise']:.2f})"
+            f"   -->   fitted (q={row['fitted_process_noise']:.2f}, r={row['fitted_observation_noise']:.2f})"
         )
 
 
@@ -128,6 +161,10 @@ if __name__ == '__main__':
     ddm_results = validate_ddm()
     ddm_results.to_csv('data/examples/ddm_validation.csv', index=False)
     print_ddm_report(ddm_results)
+
+    kalman_results = validate_kalman()
+    kalman_results.to_csv('data/examples/kalman_validation.csv', index=False)
+    print_kalman_report(kalman_results)
 
     print()
     print("Saved detailed results to data/examples/")
