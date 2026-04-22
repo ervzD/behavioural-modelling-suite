@@ -2,7 +2,7 @@
 name = "behavioural-modelling-suite"
 version = "0.1.0"
 description = "Interactive suite of computational behavioural models"
-requires-python = "3.14.4"
+requires-python = "==3.14.4"
 dependencies = [
     "numpy==1.24",
     "scipy==1.10",
