@@ -43,12 +43,21 @@ if data_source == "Use example dataset":
         t0_true = st.number_input("True non-decision time (t0)", 0.05, 1.0, 0.25, 0.05)
     with col_d:
         n_trials = st.number_input("Number of trials", 100, 2000, 500, 100)
-    seed = st.slider("Random seed", 1, 100, 42)
-    with st.spinner("Generating synthetic trials..."):
-        data = generate_ddm_dataset(
-            v=v_true, a=a_true, t0=t0_true,
-            n_trials=int(n_trials), seed=seed,
-        )
+    seed_input = st.text_input("Random seed", value="42")
+    try:
+        seed = int(seed_input)
+        if seed < 0:
+            st.error("Seed must be a non-negative integer.")
+            seed = None
+    except ValueError:
+        st.error("Seed must be a whole number.")
+        seed = None
+    if seed is not None:
+        with st.spinner("Generating synthetic trials..."):
+            data = generate_ddm_dataset(
+                v=v_true, a=a_true, t0=t0_true,
+                n_trials=int(n_trials), seed=seed,
+            )
 else:
     uploaded = st.file_uploader(
         "Upload a CSV with columns: choice (0 or 1), rt (seconds)",

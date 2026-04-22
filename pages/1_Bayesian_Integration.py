@@ -35,16 +35,51 @@ data_source = st.radio(
 data = None
 
 if data_source == "Use example dataset":
-    seed = st.slider("Random seed for example data", 1, 100, 42)
-    sigma_v = st.slider("True visual noise (sigma)", 0.1, 8.0, 1.5, 0.1)
-    sigma_a = st.slider("True auditory noise (sigma)", 0.1, 8.0, 3.0, 0.1)
-    n = st.slider("Trials per condition", 50, 1000, 200, 50)
-    data = generate_bayesian_dataset(
-        n_trials_per_condition=n,
-        sigma_visual=sigma_v,
-        sigma_auditory=sigma_a,
-        seed=seed,
-    )
+    seed_input = st.text_input("Random seed for example data", value="42")
+    try:
+        seed = int(seed_input)
+        if seed < 0:
+            st.error("Seed must be a non-negative integer.")
+            seed = None
+    except ValueError:
+        st.error("Seed must be a whole number.")
+        seed = None
+    sigma_v_input = st.text_input("True visual noise (sigma)", value="1.5")
+    try:
+        sigma_v = float(sigma_v_input)
+        if sigma_v <= 0:
+            st.error("Visual noise must be a positive number.")
+            sigma_v = None
+    except ValueError:
+        st.error("Visual noise must be a number.")
+        sigma_v = None
+
+    sigma_a_input = st.text_input("True auditory noise (sigma)", value="3.0")
+    try:
+        sigma_a = float(sigma_a_input)
+        if sigma_a <= 0:
+            st.error("Auditory noise must be a positive number.")
+            sigma_a = None
+    except ValueError:
+        st.error("Auditory noise must be a number.")
+        sigma_a = None
+
+    n_input = st.text_input("Trials per condition", value="200")
+    try:
+        n = int(n_input)
+        if n < 1:
+            st.error("Trials per condition must be a positive integer.")
+            n = None
+    except ValueError:
+        st.error("Trials per condition must be a whole number.")
+        n = None
+    if all(v is not None for v in (seed, sigma_v, sigma_a, n)):
+        data = generate_bayesian_dataset(
+            n_trials_per_condition=n,
+            sigma_visual=sigma_v,
+            sigma_auditory=sigma_a,
+            seed=seed,
+        )
 else:
     uploaded = st.file_uploader(
         "Upload a CSV with columns: modality, stimulus, response",

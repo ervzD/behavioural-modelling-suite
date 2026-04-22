@@ -47,11 +47,20 @@ if data_source == "Use example dataset":
         r_true = st.number_input("True observation noise", 0.05, 5.0, 1.2, 0.05)
     with col_c:
         n_steps = st.number_input("Number of steps", 50, 1000, 200, 50)
-    seed = st.slider("Random seed", 1, 100, 42)
-    data = generate_kalman_dataset(
-        process_noise=q_true, observation_noise=r_true,
-        n_steps=int(n_steps), seed=seed,
-    )
+    seed_input = st.text_input("Random seed", value="42")
+    try:
+        seed = int(seed_input)
+        if seed < 0:
+            st.error("Seed must be a non-negative integer.")
+            seed = None
+    except ValueError:
+        st.error("Seed must be a whole number.")
+        seed = None
+    if seed is not None:
+        data = generate_kalman_dataset(
+            process_noise=q_true, observation_noise=r_true,
+            n_steps=int(n_steps), seed=seed,
+        )
 else:
     uploaded = st.file_uploader(
         "Upload a CSV with an 'observation' column (one row per time step)",
