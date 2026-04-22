@@ -12,19 +12,30 @@ def _require_dataframe(data):
         raise ValueError("Uploaded data must be a table (CSV).")
 
 
+def _require_columns(data, required):
+    missing = required - set(data.columns)
+    if missing:
+        raise ValueError(
+            f"Missing required columns: {sorted(missing)}. "
+            f"Expected: {', '.join(sorted(required))}."
+        )
+
+
+def _require_numeric(data, columns):
+    for col in columns:
+        if not pd.api.types.is_numeric_dtype(data[col]):
+            raise ValueError(f"Column '{col}' must contain numeric values.")
+        if data[col].isna().any():
+            raise ValueError(f"Column '{col}' must not contain missing values.")
+
+
 def validate_bayesian_data(data):
     """
     Check that uploaded data is suitable for the Bayesian integration model.
     """
     _require_dataframe(data)
 
-    required = {"modality", "stimulus", "response"}
-    missing = required - set(data.columns)
-    if missing:
-        raise ValueError(
-            f"Missing required columns: {sorted(missing)}. "
-            "Expected: modality, stimulus, response."
-        )
+    _require_columns(data, {"modality", "stimulus", "response"})
 
     if len(data) == 0:
         raise ValueError("The uploaded file contains no rows.")
@@ -46,14 +57,7 @@ def validate_bayesian_data(data):
                 f"got {len(sub)}."
             )
 
-    for col in ("stimulus", "response"):
-        if not pd.api.types.is_numeric_dtype(data[col]):
-            raise ValueError(f"Column '{col}' must contain numeric values.")
-
-    if data["stimulus"].isna().any() or data["response"].isna().any():
-        raise ValueError(
-            "Columns 'stimulus' and 'response' must not contain missing values."
-        )
+    _require_numeric(data, ("stimulus", "response"))
 
 
 def validate_ddm_data(data):
@@ -62,13 +66,7 @@ def validate_ddm_data(data):
     """
     _require_dataframe(data)
 
-    required = {"choice", "rt"}
-    missing = required - set(data.columns)
-    if missing:
-        raise ValueError(
-            f"Missing required columns: {sorted(missing)}. "
-            "Expected: choice, rt."
-        )
+    _require_columns(data, {"choice", "rt"})
 
     if len(data) < 10:
         raise ValueError(
@@ -82,8 +80,7 @@ def validate_ddm_data(data):
             f"found {sorted(unique_choices)}."
         )
 
-    if not pd.api.types.is_numeric_dtype(data["rt"]):
-        raise ValueError("Column 'rt' must contain numeric values.")
+    _require_numeric(data, ("choice", "rt"))
 
     if (data["rt"] <= 0).any():
         raise ValueError("All reaction times must be positive.")
@@ -94,11 +91,6 @@ def validate_ddm_data(data):
             "Check that RT is in seconds, not milliseconds."
         )
 
-    if data["choice"].isna().any() or data["rt"].isna().any():
-        raise ValueError(
-            "Columns 'choice' and 'rt' must not contain missing values."
-        )
-
 
 def validate_kalman_data(data):
     """
@@ -106,19 +98,11 @@ def validate_kalman_data(data):
     """
     _require_dataframe(data)
 
-    if "observation" not in data.columns:
-        raise ValueError(
-            "Missing required column: 'observation'. "
-            "The file must contain an 'observation' column with one row per time step."
-        )
+    _require_columns(data, {"observation"})
 
     if len(data) < 3:
         raise ValueError(
             f"Need at least 3 observations; got {len(data)}."
         )
 
-    if not pd.api.types.is_numeric_dtype(data["observation"]):
-        raise ValueError("Column 'observation' must contain numeric values.")
-
-    if data["observation"].isna().any():
-        raise ValueError("Column 'observation' must not contain missing values.")
+    _require_numeric(data, ("observation",))
