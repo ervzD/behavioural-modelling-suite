@@ -124,10 +124,7 @@ class KalmanFilter:
         )
 
     def bic(self, data):
-        if isinstance(data, pd.DataFrame):
-            n = len(data)
-        else:
-            n = len(data)
+        n = len(data)
         k = 2
         return k * np.log(n) - 2 * self.log_likelihood(data)
 
