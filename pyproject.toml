@@ -2,17 +2,17 @@
 name = "behavioural-modelling-suite"
 version = "0.1.0"
 description = "Interactive suite of computational behavioural models"
-requires-python = ">=3.10"
+requires-python = "3.14.4"
 dependencies = [
-    "numpy>=1.24",
-    "scipy>=1.10",
-    "pandas>=2.0",
-    "matplotlib>=3.7",
-    "plotly>=5.17",
-    "streamlit>=1.28",
+    "numpy==1.24",
+    "scipy==1.10",
+    "pandas==2.0",
+    "matplotlib==3.7",
+    "plotly==5.17",
+    "streamlit==1.28",
 ]
 
 [dependency-groups]
 dev = [
-    "pytest>=7.4",
+    "pytest==7.4",
 ]
