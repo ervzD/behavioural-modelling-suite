@@ -64,7 +64,6 @@ class KalmanFilter:
         if q_std <= 0 or r_std <= 0:
             return 1e10
 
-        n = len(observations)
         mean = initial_mean
         variance = initial_variance
         q = q_std ** 2
