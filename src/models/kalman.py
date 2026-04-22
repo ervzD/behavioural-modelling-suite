@@ -106,7 +106,6 @@ class KalmanFilter:
             method="Nelder-Mead",
         )
         self.process_noise, self.observation_noise = result.x
-        self._neg_ll = result.fun
         self.fitted = True
         return self
 

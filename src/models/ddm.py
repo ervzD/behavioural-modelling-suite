@@ -149,7 +149,6 @@ class DriftDiffusionModel:
         self.v, self.a, self.t0 = result.x
         self.z = 0.5
         self.fitted = True
-        self._neg_ll = result.fun
         return self
 
     def log_likelihood(self, data):
