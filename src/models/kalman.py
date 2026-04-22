@@ -76,10 +76,7 @@ class KalmanFilter:
             predicted_variance = variance + q
             innovation_variance = predicted_variance + r
             innovation = y - predicted_mean
-            total += 0.5 * (
-                np.log(2 * np.pi * innovation_variance)
-                + (innovation ** 2) / innovation_variance
-            )
+            total -= norm.logpdf(innovation, 0, np.sqrt(innovation_variance))
             kalman_gain = predicted_variance / innovation_variance
             mean = predicted_mean + kalman_gain * innovation
             variance = (1 - kalman_gain) * predicted_variance
@@ -152,14 +149,8 @@ class KalmanFilter:
         DataFrame with columns 'time', 'true_state', and 'observation'.
         """
         rng = np.random.default_rng(seed)
-        states = np.zeros(n_steps)
-        observations = np.zeros(n_steps)
-
-        x = initial_state
-        for t in range(n_steps):
-            x += rng.normal(0, process_noise)
-            states[t] = x
-            observations[t] = x + rng.normal(0, observation_noise)
+        states = initial_state + np.cumsum(rng.normal(0, process_noise, n_steps))
+        observations = states + rng.normal(0, observation_noise, n_steps)
 
         return pd.DataFrame({
             "time": np.arange(n_steps),
