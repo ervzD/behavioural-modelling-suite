@@ -7,12 +7,16 @@ The Streamlit pages catch these and display the message to the user.
 import pandas as pd
 
 
+def _require_dataframe(data):
+    if not isinstance(data, pd.DataFrame):
+        raise ValueError("Uploaded data must be a table (CSV).")
+
+
 def validate_bayesian_data(data):
     """
     Check that uploaded data is suitable for the Bayesian integration model.
     """
-    if not isinstance(data, pd.DataFrame):
-        raise ValueError("Uploaded data must be a table (CSV).")
+    _require_dataframe(data)
 
     required = {"modality", "stimulus", "response"}
     missing = required - set(data.columns)
@@ -56,8 +60,7 @@ def validate_ddm_data(data):
     """
     Check that uploaded data is suitable for the drift diffusion model.
     """
-    if not isinstance(data, pd.DataFrame):
-        raise ValueError("Uploaded data must be a table (CSV).")
+    _require_dataframe(data)
 
     required = {"choice", "rt"}
     missing = required - set(data.columns)
@@ -101,8 +104,7 @@ def validate_kalman_data(data):
     """
     Check that uploaded data is suitable for the Kalman filter model.
     """
-    if not isinstance(data, pd.DataFrame):
-        raise ValueError("Uploaded data must be a table (CSV).")
+    _require_dataframe(data)
 
     if "observation" not in data.columns:
         raise ValueError(
