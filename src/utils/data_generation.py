@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from src.models.bayesian import BayesianIntegration
 from src.models.ddm import DriftDiffusionModel
 from src.models.kalman import KalmanFilter
 
@@ -28,15 +29,11 @@ def generate_bayesian_dataset(
     visual_response = stimuli + rng.normal(0, sigma_visual, size=n_trials_per_condition)
     auditory_response = stimuli + rng.normal(0, sigma_auditory, size=n_trials_per_condition)
 
-    var_v = sigma_visual ** 2
-    var_a = sigma_auditory ** 2
-    w_v = var_a / (var_v + var_a)
-    w_a = var_v / (var_v + var_a)
-    sigma_combined = np.sqrt((var_v * var_a) / (var_v + var_a))
-
     s_v_combined = stimuli + rng.normal(0, sigma_visual, size=n_trials_per_condition)
     s_a_combined = stimuli + rng.normal(0, sigma_auditory, size=n_trials_per_condition)
-    combined_mean = w_v * s_v_combined + w_a * s_a_combined
+    combined_mean, sigma_combined = BayesianIntegration.predict(
+        s_v_combined, s_a_combined, sigma_visual, sigma_auditory
+    )
     combined_response = combined_mean + rng.normal(0, sigma_combined * 0.1, size=n_trials_per_condition)
 
     visual_df = pd.DataFrame({
