@@ -1,0 +1,122 @@
+"""
+Shared validation routines for user-uploaded data. Each function raises a
+ValueError with a clear, user-facing message if the data fails a check.
+The Streamlit pages catch these and display the message to the user.
+"""
+
+import pandas as pd
+
+
+def validate_bayesian_data(data):
+    """
+    Check that uploaded data is suitable for the Bayesian integration model.
+    """
+    if not isinstance(data, pd.DataFrame):
+        raise ValueError("Uploaded data must be a table (CSV).")
+
+    required = {"modality", "stimulus", "response"}
+    missing = required - set(data.columns)
+    if missing:
+        raise ValueError(
+            f"Missing required columns: {sorted(missing)}. "
+            "Expected: modality, stimulus, response."
+        )
+
+    if len(data) == 0:
+        raise ValueError("The uploaded file contains no rows.")
+
+    valid_modalities = {"visual", "auditory", "combined"}
+    found = set(data["modality"].dropna().unique())
+    unknown = found - valid_modalities
+    if unknown:
+        raise ValueError(
+            f"Unrecognised modality labels: {sorted(unknown)}. "
+            "Expected only: visual, auditory, combined."
+        )
+
+    for mod in ("visual", "auditory"):
+        sub = data[data["modality"] == mod]
+        if len(sub) < 2:
+            raise ValueError(
+                f"Need at least 2 '{mod}' trials to estimate its noise; "
+                f"got {len(sub)}."
+            )
+
+    for col in ("stimulus", "response"):
+        if not pd.api.types.is_numeric_dtype(data[col]):
+            raise ValueError(f"Column '{col}' must contain numeric values.")
+
+    if data["stimulus"].isna().any() or data["response"].isna().any():
+        raise ValueError(
+            "Columns 'stimulus' and 'response' must not contain missing values."
+        )
+
+
+def validate_ddm_data(data):
+    """
+    Check that uploaded data is suitable for the drift diffusion model.
+    """
+    if not isinstance(data, pd.DataFrame):
+        raise ValueError("Uploaded data must be a table (CSV).")
+
+    required = {"choice", "rt"}
+    missing = required - set(data.columns)
+    if missing:
+        raise ValueError(
+            f"Missing required columns: {sorted(missing)}. "
+            "Expected: choice, rt."
+        )
+
+    if len(data) < 10:
+        raise ValueError(
+            f"Need at least 10 trials to fit reliably; got {len(data)}."
+        )
+
+    unique_choices = set(data["choice"].dropna().unique())
+    if not unique_choices.issubset({0, 1}):
+        raise ValueError(
+            f"The 'choice' column must contain only 0 or 1; "
+            f"found {sorted(unique_choices)}."
+        )
+
+    if not pd.api.types.is_numeric_dtype(data["rt"]):
+        raise ValueError("Column 'rt' must contain numeric values.")
+
+    if (data["rt"] <= 0).any():
+        raise ValueError("All reaction times must be positive.")
+
+    if data["rt"].max() > 60:
+        raise ValueError(
+            "Some reaction times exceed 60 seconds. "
+            "Check that RT is in seconds, not milliseconds."
+        )
+
+    if data["choice"].isna().any() or data["rt"].isna().any():
+        raise ValueError(
+            "Columns 'choice' and 'rt' must not contain missing values."
+        )
+
+
+def validate_kalman_data(data):
+    """
+    Check that uploaded data is suitable for the Kalman filter model.
+    """
+    if not isinstance(data, pd.DataFrame):
+        raise ValueError("Uploaded data must be a table (CSV).")
+
+    if "observation" not in data.columns:
+        raise ValueError(
+            "Missing required column: 'observation'. "
+            "The file must contain an 'observation' column with one row per time step."
+        )
+
+    if len(data) < 3:
+        raise ValueError(
+            f"Need at least 3 observations; got {len(data)}."
+        )
+
+    if not pd.api.types.is_numeric_dtype(data["observation"]):
+        raise ValueError("Column 'observation' must contain numeric values.")
+
+    if data["observation"].isna().any():
+        raise ValueError("Column 'observation' must not contain missing values.")

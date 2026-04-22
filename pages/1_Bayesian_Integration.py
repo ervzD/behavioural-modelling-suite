@@ -8,6 +8,7 @@ import streamlit as st
 
 from src.models.bayesian import BayesianIntegration
 from src.utils.data_generation import generate_bayesian_dataset
+from src.utils.data_validation import validate_bayesian_data
 
 
 st.set_page_config(page_title="Bayesian Integration", layout="wide")
@@ -59,20 +60,11 @@ if data is None:
     st.info("Load a dataset to continue.")
     st.stop()
 
-required_cols = {"modality", "stimulus", "response"}
-missing = required_cols - set(data.columns)
-if missing:
-    st.error(f"Data is missing required columns: {sorted(missing)}")
+try:
+    validate_bayesian_data(data)
+except ValueError as exc:
+    st.error(str(exc))
     st.stop()
-
-valid_modalities = {"visual", "auditory", "combined"}
-found_modalities = set(data["modality"].unique())
-unknown = found_modalities - valid_modalities
-if unknown:
-    st.warning(
-        f"Unrecognised modality labels {sorted(unknown)}. "
-        "Expected one of: visual, auditory, combined."
-    )
 
 st.header("2. Data preview")
 

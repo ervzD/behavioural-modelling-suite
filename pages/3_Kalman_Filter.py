@@ -8,7 +8,7 @@ import streamlit as st
 
 from src.models.kalman import KalmanFilter
 from src.utils.data_generation import generate_kalman_dataset
-
+from src.utils.data_validation import validate_kalman_data
 
 st.set_page_config(page_title="Kalman Filter", layout="wide")
 
@@ -67,8 +67,10 @@ if data is None:
     st.info("Load a dataset to continue.")
     st.stop()
 
-if "observation" not in data.columns:
-    st.error("Data must contain an 'observation' column.")
+try:
+    validate_kalman_data(data)
+except ValueError as exc:
+    st.error(str(exc))
     st.stop()
 
 st.header("2. Data preview")

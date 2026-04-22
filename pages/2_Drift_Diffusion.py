@@ -8,7 +8,7 @@ import streamlit as st
 
 from src.models.ddm import DriftDiffusionModel
 from src.utils.data_generation import generate_ddm_dataset
-
+from src.utils.data_validation import validate_ddm_data
 
 st.set_page_config(page_title="Drift Diffusion", layout="wide")
 
@@ -64,18 +64,10 @@ if data is None:
     st.info("Load a dataset to continue.")
     st.stop()
 
-required_cols = {"choice", "rt"}
-missing = required_cols - set(data.columns)
-if missing:
-    st.error(f"Data is missing required columns: {sorted(missing)}")
-    st.stop()
-
-if not set(data["choice"].unique()).issubset({0, 1}):
-    st.error("The 'choice' column must contain only 0 or 1.")
-    st.stop()
-
-if (data["rt"] <= 0).any():
-    st.error("All reaction times must be positive.")
+try:
+    validate_ddm_data(data)
+except ValueError as exc:
+    st.error(str(exc))
     st.stop()
 
 st.header("2. Data preview")
