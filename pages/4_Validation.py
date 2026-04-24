@@ -34,7 +34,7 @@ st.markdown(
 with st.spinner("Running Bayesian validation..."):
     bayes_results = validate_bayesian()
 
-st.dataframe(bayes_results.round(3), use_container_width=True)
+st.dataframe(bayes_results.round(3), width="stretch")
 
 fig = go.Figure()
 fig.add_trace(go.Scatter(
@@ -53,7 +53,7 @@ fig.update_layout(
     xaxis_title="True visual noise (sigma)",
     yaxis_title="Visual weight",
 )
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
 
 st.header("Drift diffusion: parameter recovery")
 
@@ -69,7 +69,7 @@ st.markdown(
 with st.spinner("Fitting DDM (may take a minute)..."):
     ddm_results = validate_ddm()
 
-st.dataframe(ddm_results.round(3), use_container_width=True)
+st.dataframe(ddm_results.round(3), width="stretch")
 
 fig = go.Figure()
 fig.add_trace(go.Scatter(
@@ -94,7 +94,7 @@ fig.update_layout(
     title="DDM parameter recovery",
     xaxis_title="True value", yaxis_title="Fitted value",
 )
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
 
 st.header("Kalman filter: parameter recovery")
 
@@ -109,7 +109,7 @@ st.markdown(
 with st.spinner("Fitting Kalman filter..."):
     kalman_results = validate_kalman()
 
-st.dataframe(kalman_results.round(3), use_container_width=True)
+st.dataframe(kalman_results.round(3), width="stretch")
 
 fig = go.Figure()
 fig.add_trace(go.Scatter(
@@ -132,4 +132,4 @@ fig.update_layout(
     title="Kalman filter parameter recovery",
     xaxis_title="True value", yaxis_title="Fitted value",
 )
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")

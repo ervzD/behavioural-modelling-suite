@@ -105,7 +105,7 @@ st.header("2. Data preview")
 
 col1, col2 = st.columns([2, 1])
 with col1:
-    st.dataframe(data.head(20), use_container_width=True)
+    st.dataframe(data.head(20), width="stretch")
 with col2:
     counts = data["modality"].value_counts()
     st.markdown("**Trials per modality**")
@@ -161,7 +161,7 @@ with tab1:
         title="Response distribution by modality",
     )
     fig.update_layout(xaxis_title="Response", yaxis_title="Count")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with tab2:
     sigma_v_range = np.linspace(0.1, max(summary["sigma_visual"] * 3, 6), 100)
@@ -182,7 +182,7 @@ with tab2:
         xaxis_title="Visual noise (sigma)",
         yaxis_title="Visual weight",
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with tab3:
     res_frames = []
@@ -197,7 +197,7 @@ with tab3:
         residuals = pd.concat(res_frames, ignore_index=True)
         fig = px.box(residuals, x="modality", y="residual",
                      title="Residuals by modality (response minus stimulus)")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     else:
         st.info("No unimodal trials available to compute residuals.")
 

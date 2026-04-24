@@ -83,7 +83,7 @@ st.header("2. Data preview")
 
 col1, col2 = st.columns([2, 1])
 with col1:
-    st.dataframe(data.head(20), use_container_width=True)
+    st.dataframe(data.head(20), width="stretch")
 with col2:
     st.markdown("**Summary**")
     st.markdown(f"- Total trials: {len(data)}")
@@ -142,7 +142,7 @@ with tab1:
         labels={"color": "choice"},
     )
     fig.update_layout(xaxis_title="Reaction time (s)", yaxis_title="Count")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with tab2:
     props = pd.DataFrame({
@@ -151,7 +151,7 @@ with tab2:
     })
     fig = px.bar(props, x="choice", y="proportion",
                  title="Empirical choice proportions", range_y=[0, 1])
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with tab3:
     st.caption(
@@ -173,7 +173,7 @@ with tab3:
         title="Observed vs. model-predicted RT distribution",
     )
     fig.update_layout(xaxis_title="Reaction time (s)", yaxis_title="Count")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 st.header("6. Export")
 

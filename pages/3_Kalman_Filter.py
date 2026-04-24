@@ -86,7 +86,7 @@ st.header("2. Data preview")
 
 col1, col2 = st.columns([2, 1])
 with col1:
-    st.dataframe(data.head(20), use_container_width=True)
+    st.dataframe(data.head(20), width="stretch")
 with col2:
     st.markdown("**Summary**")
     st.markdown(f"- Time steps: {len(data)}")
@@ -163,7 +163,7 @@ with tab1:
         xaxis_title="Time step",
         yaxis_title="Value",
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with tab2:
     residuals = data["observation"].values - filtered_means
@@ -172,7 +172,7 @@ with tab2:
         title="Innovation residuals (observation minus filtered estimate)",
     )
     fig.update_layout(xaxis_title="Residual", yaxis_title="Count")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 st.header("6. Export")
 
